@@ -1,4 +1,4 @@
-CREATE TABLE IF NOt EXISTS products (
+CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
     description TEXT,
@@ -9,6 +9,6 @@ CREATE TABLE IF NOt EXISTS products (
     brand VARCHAR(20),
     category VARCHAR(20),
     thumbnail VARCHAR(100)
-)
+) 
 
 

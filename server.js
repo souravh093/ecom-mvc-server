@@ -4,7 +4,6 @@ import sql from "mysql2";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { error } from "console";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,29 +25,36 @@ export const connection = sql.createConnection({
 
 connection.connect((err) => {
   if (err) {
-    console.error("Error connecting" + err.stack);
+    console.error('Error connecting to MySQL: ' + err.stack);
     return;
   }
+  console.log('Connected to MySQL as id ' + connection.threadId);
 
-  console.log("Connect as thread id " + connection.threadId);
+  const schemaPath = join(__dirname, 'schema');
 
-  const schemaPath = join(__dirname, "schema.sql");
-  fs.readFile(schemaPath, "utf-8", (err, data) => {
+  fs.readdir(schemaPath, (err, files) => {
     if (err) {
-      console.error("Error reading schema file " + err.message);
-      return
+      console.error('Error reading schema directory: ' + err.message);
+      return;
     }
 
-    connection.query(data, (error, results) => {
-        if(error) {
-            console.error("Error executing schema: " + error.message);
-            return;
-        }
+    files.forEach((file) => {
+      if (file.endsWith('.sql')) {
+        const filePath = join(schemaPath, file);
+        const sql = fs.readFileSync(filePath, 'utf-8');
 
-        console.log('Database schema has been set UP!')
-    })
+        connection.query(sql, (error, results) => {
+          if (error) {
+            console.error('Error executing schema: ' + error.message);
+          } else {
+            console.log(`Schema from ${file} has been executed successfully.`);
+          }
+        });
+      }
+    });
   });
 });
+
 
 app.get("/", (req, res) => {
     res.send("Server is running")
